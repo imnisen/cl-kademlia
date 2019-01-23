@@ -16,7 +16,8 @@
   :version "0.1"
   :author "Nisen"
   :license ""
-  :depends-on (:log4cl
+  :depends-on (:cl-rpc-udp
+               :log4cl
                :ironclad
                :usocket
                :flexi-streams
@@ -25,7 +26,6 @@
   :components ((:module "src"
                 :components
                 ((:file "tools")
-                 (:file "rpc")
                  (:file "node")
                  (:file "protocol")
                  (:file "routing")

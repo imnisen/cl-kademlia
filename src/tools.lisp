@@ -89,7 +89,8 @@
   (format t "~%~a~%" b)
 
   #+sbcl
-  (setf b (make-array (length b) :element-type '(unsigned-byte 8)  :initial-contents (loop for x across b collect x)))
+  (setf b (make-array (length b) :element-type '(unsigned-byte 8)  :initial-contents
+                      (loop for x across b collect x)))
 
   (parse-integer (ironclad:byte-array-to-hex-string b) :radix 16))
 
@@ -149,3 +150,7 @@
     (if values
         (values a b c d)
         (format nil "~d.~d.~d.~d" a b c d))))
+
+
+(defun ensure-vector (l)
+  (coerce l 'vector))

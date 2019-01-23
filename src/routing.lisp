@@ -207,6 +207,7 @@ per section 4.1 of the paper."))
 
 
 (defmethod add-contact ((routing-table routing-table) node)
+  (break)
   (let* ((index (get-bucket-for routing-table node))
          (bucket (nth index (router-buckets routing-table))))
     (when (not (add-node bucket node))

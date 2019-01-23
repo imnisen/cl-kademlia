@@ -4,7 +4,7 @@
 (in-package :cl-kademlia)
 
 
-(defclass protocol (transport-udp-server transport-udp-client)
+(defclass protocol (rpcudp:transport-udp-server rpcudp:transport-udp-client)
   ((node :initarg :node
          :accessor protocol-node
          :initform nil)
@@ -22,34 +22,35 @@
 ;; Or change rpc inteface
 (defmethod initialize-instance :after ((protocol protocol) &key)
   "Add rpc methods"
-  (expose protocol "PING" (lambda (addr sender-id) (rpc-ping protocol addr sender-id)))
-  (expose protocol "STORE" (lambda (addr sender-id key value) (rpc-store protocol addr sender-id key value)))
-  (expose protocol "FIND_NODE" (lambda (addr sender-id key) (rpc-find-node protocol addr sender-id key)))
-  (expose protocol "FIND_VALUE" (lambda (addr sender-id key) (rpc-find-value protocol addr sender-id key))))
+  (rpcudp:expose protocol "PING" (lambda (sender-id) (rpc-ping protocol sender-id)))
+  (rpcudp:expose protocol "STORE" (lambda (sender-id key value) (rpc-store protocol sender-id key value)))
+  (rpcudp:expose protocol "FIND_NODE" (lambda (sender-id key) (rpc-find-node protocol sender-id key)))
+  (rpcudp:expose protocol "FIND_VALUE" (lambda (sender-id key) (rpc-find-value protocol sender-id key))))
 
 ;; TODO  RPC 的接收者可以把 PING 附带在 RPC 的回应中以进一步确认发送者网络地址的有效性。
 
-(defmethod rpc-ping ((protocol protocol) addr sender-id)
+(defmethod rpc-ping ((protocol protocol) sender-id)
   "Handle a PING request
 return a randowm 160bits rpc id"
   ;; (generate-random-160bits-fun)   todo later
-
+  (break)
   (let ((source (make-instance 'node
                                :id sender-id
-                               :ip (first addr)
-                               :port (second addr)
+                               :ip rpcudp:*remote-host*
+                               :port rpcudp:*remote-port*
                                )))
+    (break)
     (welcome-if-new-node protocol source) ;; TODO use macro to wrapper the let and welcome-**
 
     (node-id (protocol-node protocol))))
 
 
-(defmethod rpc-store ((protocol protocol) addr sender-id key value)
+(defmethod rpc-store ((protocol protocol) sender-id key value)
   ""
   (let ((source (make-instance 'node
                                :id sender-id
-                               :ip (first addr)
-                               :port (second addr)
+                               :ip rpcudp:*remote-host*
+                               :port rpcudp:*remote-port*
                                )))
     (welcome-if-new-node protocol source)
 
@@ -58,13 +59,13 @@ return a randowm 160bits rpc id"
                    value)
     t))
 
-(defmethod rpc-find-node ((protocol protocol) addr sender-id key)
+(defmethod rpc-find-node ((protocol protocol) sender-id key)
   "response k nearest nodes from id I know.
 id is 160bit; return data is '((ip,port,id) (ip,port,id) ...)"
   (let ((source (make-instance 'node
                                :id sender-id
-                               :ip (first addr)
-                               :port (second addr)
+                               :ip rpcudp:*remote-host*
+                               :port rpcudp:*remote-port*
                                )))
     (welcome-if-new-node protocol source)
 
@@ -76,15 +77,15 @@ id is 160bit; return data is '((ip,port,id) (ip,port,id) ...)"
                        n)))
       re)))
 
-(defmethod rpc-find-value ((protocol protocol) addr sender-id key)
+(defmethod rpc-find-value ((protocol protocol) sender-id key)
   "same as find node, but if I have store the value of id, just return it"
 
 
 
   (let ((source (make-instance 'node
                                :id sender-id
-                               :ip (first addr)
-                               :port (second addr)
+                               :ip rpcudp:*remote-host*
+                               :port rpcudp:*remote-port*
                                )))
     (welcome-if-new-node protocol source)
     (let ((result (storage-fetch (protocol-storage protocol) key)))
@@ -104,41 +105,41 @@ id is 160bit; return data is '((ip,port,id) (ip,port,id) ...)"
 
 ;; client part
 (defmethod call-ping ((protocol protocol) node-to-ask &key bootstraped)
-  (client-connect protocol :host (node-ip node-to-ask) :port (node-port node-to-ask))
+  (rpcudp:connect protocol :host (node-ip node-to-ask) :port (node-port node-to-ask))
 
   (prog1
       ;; real logic
-      (let* ((call-result (call protocol "PING" (list (node-id (protocol-node protocol))) :timeout 5))
+      (let* ((call-result (rpcudp:call protocol "PING" (list (node-id (protocol-node protocol))) :timeout 5))
              (success (not (null call-result))))
         (when (not bootstraped)
           (handle-call-response protocol call-result node-to-ask))
         (list (node-id node-to-ask) success call-result))
-    (client-stop protocol)))
+    (rpcudp:disconnect protocol)))
 
 
 (defmethod call-store ((protocol protocol) node-to-ask key value)
-  (client-connect protocol :host (node-ip node-to-ask) :port (node-port node-to-ask))
+  (rpcudp:connect protocol :host (node-ip node-to-ask) :port (node-port node-to-ask))
   (prog1
       ;; real logic
-      (let* ((call-result (call protocol "STORE" (list (node-id (protocol-node protocol)) key value) :timeout 5))
+      (let* ((call-result (rpcudp:call protocol "STORE" (list (node-id (protocol-node protocol)) key value) :timeout 5))
              (success (not (null call-result))))
         (handle-call-response protocol call-result node-to-ask)
 
         (list (node-id node-to-ask) success call-result))
-    (client-stop protocol))
+    (rpcudp:disconnect protocol))
   )
 
 (defmethod call-find-node ((protocol protocol) node-to-ask node-to-find)
 
-  (client-connect protocol :host (node-ip node-to-ask) :port (node-port node-to-ask))
+  (rpcudp:connect protocol :host (node-ip node-to-ask) :port (node-port node-to-ask))
 
   (prog1
       ;; real logic
-      (let* ((call-result (call protocol "FIND_NODE" (list (node-id (protocol-node protocol)) (node-id node-to-find)) :timeout 5))
+      (let* ((call-result (rpcudp:call protocol "FIND_NODE" (list (node-id (protocol-node protocol)) (node-id node-to-find)) :timeout 5))
              (success (not (null call-result))))
         (handle-call-response protocol call-result node-to-ask)
         (list (node-id node-to-ask) success call-result))
-    (client-stop protocol))
+    (rpcudp:disconnect protocol))
   )
 
 
@@ -146,32 +147,32 @@ id is 160bit; return data is '((ip,port,id) (ip,port,id) ...)"
 (defmethod call-find-value ((protocol protocol) node-to-ask node-to-find)
 
 
-  (client-connect protocol :host (node-ip node-to-ask) :port (node-port node-to-ask))
+  (rpcudp:connect protocol :host (node-ip node-to-ask) :port (node-port node-to-ask))
 
   (prog1
       ;; real logic
-      (let* ((call-result (call protocol "FIND_VALUE" (list (node-id (protocol-node protocol)) (node-id node-to-find)) :timeout 5))
+      (let* ((call-result (rpcudp:call protocol "FIND_VALUE" (list (node-id (protocol-node protocol)) (node-id node-to-find)) :timeout 5))
              (success (not (null call-result))))
         (handle-call-response protocol call-result node-to-ask)
         (list (node-id node-to-ask) success call-result))
-    (client-stop protocol))
+    (rpcudp:disconnect protocol))
 
   )
 
 ;; need refactor
 (defmacro client-wrapper (&body body)
   `(progn
-     (client-connect protocol :host (node-ip node-to-ask) :port (node-port node-to-ask))
+     (rpcudp:connect protocol :host (node-ip node-to-ask) :port (node-port node-to-ask))
      (prog1
          ;; real logic
          ,@body
 
-       (client-stop protocol))))
+       (rpcudp:disconnect protocol))))
 
 
 
-;; TODO use macro to wrapper client-connect and client-stop
-;; (client-connect protocol :host (host peer) :port (port peer))
+;; TODO use macro to wrapper rpcudp:connect and rpcudp:disconnect
+;; (rpcudp:connect protocol :host (host peer) :port (port peer))
 ;; (protocol-stop *protocol*)
 
 

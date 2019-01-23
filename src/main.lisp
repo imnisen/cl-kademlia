@@ -59,7 +59,6 @@
     s))
 
 
-
 ;; (ql:quickload :cl-kademlia)
 ;; (in-package :cl-kademlia)
 ;; (setf s1 (make-node 9001 "s1" "s1"))

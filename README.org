@@ -19,7 +19,7 @@ The code is messy now. I'll keep polishing it while possible :)
 ** TODO-LIST
 - [X] Debug and finish server's get method and set method
 - [X] Try to abstract bootstrap, set-key and get-key method
-- [ ] Refactor rpc method famework
+- [X] Refactor rpc method famework
 - [ ] Handle rpc error condtions
 - [ ] Add server stop method
 - [ ] Refactor kbucket's nodes data type, make it easy use

@@ -117,7 +117,7 @@ addrs format: '((\"127.0.0.0\" 8001) (\"127.0.0.0\" 8002) (\"127.0.0.0\" 8003))"
 (defmethod listen-on ((server server) host port)
   "Load storage; start kad-server"
   ;; (storage-load (server-sotrage))
-  (server-listen (server-protocol server) :host host :port port))
+  (rpcudp:start (server-protocol server) :host host :port port))
 
 
 
