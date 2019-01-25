@@ -22,10 +22,10 @@
 ;; Or change rpc inteface
 (defmethod initialize-instance :after ((protocol protocol) &key)
   "Add rpc methods"
-  (rpcudp:expose protocol "PING" (lambda (sender-id) (rpc-ping protocol sender-id)))
-  (rpcudp:expose protocol "STORE" (lambda (sender-id key value) (rpc-store protocol sender-id key value)))
-  (rpcudp:expose protocol "FIND_NODE" (lambda (sender-id key) (rpc-find-node protocol sender-id key)))
-  (rpcudp:expose protocol "FIND_VALUE" (lambda (sender-id key) (rpc-find-value protocol sender-id key))))
+  (rpcudp:expose protocol "PING" (lambda (sender-id) (rpc-ping protocol (ensure-vector sender-id))))
+  (rpcudp:expose protocol "STORE" (lambda (sender-id key value) (rpc-store protocol (ensure-vector sender-id) (ensure-vector key) value)))
+  (rpcudp:expose protocol "FIND_NODE" (lambda (sender-id key) (rpc-find-node protocol (ensure-vector sender-id) (ensure-vector key))))
+  (rpcudp:expose protocol "FIND_VALUE" (lambda (sender-id key) (rpc-find-value protocol (ensure-vector sender-id) (ensure-vector key)))))
 
 ;; TODO  RPC 的接收者可以把 PING 附带在 RPC 的回应中以进一步确认发送者网络地址的有效性。
 
@@ -33,13 +33,14 @@
   "Handle a PING request
 return a randowm 160bits rpc id"
   ;; (generate-random-160bits-fun)   todo later
-  (break)
+  ;; (break)
+  (log:info "rpc-ping with args:" sender-id)
   (let ((source (make-instance 'node
                                :id sender-id
                                :ip rpcudp:*remote-host*
                                :port rpcudp:*remote-port*
                                )))
-    (break)
+    ;; (break)
     (welcome-if-new-node protocol source) ;; TODO use macro to wrapper the let and welcome-**
 
     (node-id (protocol-node protocol))))
@@ -47,6 +48,7 @@ return a randowm 160bits rpc id"
 
 (defmethod rpc-store ((protocol protocol) sender-id key value)
   ""
+  (log:info "rpc-ping with args:" sender-id key value)
   (let ((source (make-instance 'node
                                :id sender-id
                                :ip rpcudp:*remote-host*
@@ -62,6 +64,7 @@ return a randowm 160bits rpc id"
 (defmethod rpc-find-node ((protocol protocol) sender-id key)
   "response k nearest nodes from id I know.
 id is 160bit; return data is '((ip,port,id) (ip,port,id) ...)"
+  (log:info "rpc-ping with args:" sender-id key)
   (let ((source (make-instance 'node
                                :id sender-id
                                :ip rpcudp:*remote-host*
@@ -80,7 +83,7 @@ id is 160bit; return data is '((ip,port,id) (ip,port,id) ...)"
 (defmethod rpc-find-value ((protocol protocol) sender-id key)
   "same as find node, but if I have store the value of id, just return it"
 
-
+  (log:info "rpc-ping with args:" sender-id key)
 
   (let ((source (make-instance 'node
                                :id sender-id

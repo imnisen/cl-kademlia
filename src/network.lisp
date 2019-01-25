@@ -9,7 +9,10 @@
   (etypecase value
     (integer t)
     (float t)
-    (string t)))
+    (string t)
+    (bool t)
+    ;; (vector t)
+    ))
 
 (defmacro magic-concurrent-async (&body body)
   (let ((g (gensym)))
@@ -141,7 +144,6 @@ addrs format: '((\"127.0.0.0\" 8001) (\"127.0.0.0\" 8002) (\"127.0.0.0\" 8003))"
   "First check local storage, if not found, then find neighbors of key,
 call FIND_VALUE to them.
 "
-  (check-dht-value-type key)
   (let* ((node-to-find (make-node-from-key key))
          (result (storage-fetch (server-storage server) (node-id node-to-find))))
     ;; (break)
@@ -255,7 +257,7 @@ call FIND_VALUE to them.
   "Find in my route table neighbors to key. Call FIND_NODE(key) to them, getting the nearest nodes to key.
 Call STORE(key value) to them. If self node is nearer than nodes found, self node also store the key value.
 if any remote SRORE finished return success."
-  (check-dht-value-type key)
+  (check-dht-value-type value)
 
   (let* ((node-to-find (make-node-from-key key))
          (nearest (find-server-neighbors server node-to-find)))

@@ -87,6 +87,7 @@
 (defun byte-array-to-integer* (b)
   (format t "~%~a~%" (type-of b))
   (format t "~%~a~%" b)
+  (setf b (coerce b 'vector))  ;; temp solutions
 
   #+sbcl
   (setf b (make-array (length b) :element-type '(unsigned-byte 8)  :initial-contents
