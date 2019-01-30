@@ -10,11 +10,13 @@
 (plan nil)
 
 
+(ql:quickload :cl-kademlia)
+(in-package :cl-kademlia)
 
-(defparameter s1 (make-node 9001 "s1" "s1"))
+(defparameter s1 (make-test-node 9001 "s1" "s1"))
 
 
-(defparameter s2 (make-node 9002 "s2" "s2"))
+(defparameter s2 (make-test-node 9002 "s2" "s2"))
 
 (bootstrap s1 :addrs '(("127.0.0.1" 9002)))
 

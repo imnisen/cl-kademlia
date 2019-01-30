@@ -11,9 +11,10 @@
                 :accessor kbucket-range-lower)
    (range-upper :initarg :range-upper
                 :accessor kbucket-range-upper) ;; kbucket range
+   ;; format (#(126 36 13 231 79 177 237 8 250 8 211 128 99 246 166 169 20 98 168 21) . #<NODE #x302001BB4CDD>)
    (nodes :initarg :nodes
           :accessor kbucket-nodes
-          :initform '())  ;; format (#(126 36 13 231 79 177 237 8 250 8 211 128 99 246 166 169 20 98 168 21) . #<NODE #x302001BB4CDD>)
+          :initform '())
    (replacement-nodes :initarg :replacement-nodes
                       :accessor kbucket-replacement-nodes
                       :initform '())
@@ -51,8 +52,6 @@ per section 4.1 of the paper."))
 
 (defgeneric head (kbucket)
   (:documentation ""))
-
-;; -----------------------------
 
 (defmethod get-nodes ((kbucket kbucket))
   (mapcar #'cdr (kbucket-nodes kbucket)))
@@ -123,12 +122,8 @@ per section 4.1 of the paper."))
    (protocol :initarg :protocol
              :accessor router-protocol))  )
 
-
-
 (defgeneric find-neighbors (routing-table node-to-find  &key k exclude)
   (:documentation ""))
-
-
 
 (defgeneric split-bucket (routing-table index)
   (:documentation ""))
@@ -148,9 +143,6 @@ per section 4.1 of the paper."))
 
 (defgeneric get-bucket-for (routing-table target-id)
   (:documentation ""))
-
-
-;; ---------------------
 
 (defmethod initialize-instance :after ((routing-table routing-table) &key)
   (setf (router-buckets routing-table)
@@ -207,7 +199,6 @@ per section 4.1 of the paper."))
 
 
 (defmethod add-contact ((routing-table routing-table) node)
-  ;; (break)
   (let* ((index (get-bucket-for routing-table node))
          (bucket (nth index (router-buckets routing-table))))
     (when (not (add-node bucket node))

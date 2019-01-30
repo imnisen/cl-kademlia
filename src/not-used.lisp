@@ -1,3 +1,11 @@
+;; Latter
+;; (defgeneric ask-for-nearest-peers (server peer)
+;;   (:documentation "Find neighbors to peer in server's route-table "))
+;; (defgeneric get-distance (server peer)
+;;   (:documentation ""))
+
+
+;;; crawling.lisp
 ;; (defclass spider-crawl ()
 ;;   ((protocol :initarg :protocol
 ;;              :accessor spider-protocol)

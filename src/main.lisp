@@ -28,7 +28,7 @@
 ;;   )
 
 
-(defun make-node (port name key-id)
+(defun make-test-node (port name key-id)
   (let* ((n (make-instance 'node
                            :id (digest key-id)
                            :ip "127.0.0.1"
@@ -61,8 +61,8 @@
 
 ;; (ql:quickload :cl-kademlia)
 ;; (in-package :cl-kademlia)
-;; (setf s1 (make-node 9001 "s1" "s1"))
-;; (setf s2 (make-node 9002 "s2" "s2"))
+;; (setf s1 (make-test-node 9001 "s1" "s1"))
+;; (setf s2 (make-test-node 9002 "s2" "s2"))
 ;; (bootstrap s1 :addrs '(("127.0.0.1" 9002)))
 ;; (get-key s1 "hi")
 ;; (set-key s1 "hi" "world")

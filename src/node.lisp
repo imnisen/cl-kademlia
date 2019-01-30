@@ -3,7 +3,6 @@
   (:use :cl))
 (in-package :cl-kademlia)
 
-
 (defclass node ()
   ((id :initarg :id
        :accessor node-id
@@ -15,7 +14,6 @@
    (long-id :initarg :long-id
             :initform nil)))
 
-
 (defgeneric distance-to (node target-node)
   (:documentation "Get distance between this node and target node" ))
 
@@ -25,28 +23,25 @@
 (defgeneric node-long-id (node)
   (:documentation ""))
 
-
 (defmethod distance-to ((node node) target-node)
   (bit-smasher:int<- (bit-xor (bit-smasher:bits<- (node-long-id node))
                               (bit-smasher:bits<- (node-long-id target-node)))))
-
-
 
 (defmethod node-long-id ((node node))
   (when (node-id node)
     (byte-array-to-integer* (node-id node))))
 
-
-
 (defmethod same-home-as ((node node) target-node)
   (and (equal (node-ip node) (node-ip target-node))
        (equal (node-port node) (node-port target-node))))
 
-;; (defmethod (setf node-long-id) ((node node) long-id)
-;;   ())
 
-
-
+(defmacro make-node (&key id ip port)
+  (assert (not (null ip)))
+  (assert (not (null port)))
+  (if id
+      `(make-instance 'node :ip ,ip :port ,port :id ,id)
+      `(make-instance 'node :ip ,ip :port ,port)))
 
 ;; ;; To use latter
 ;; (defclass node-heap ()

@@ -24,11 +24,11 @@ The code is messy now. I'll keep polishing it while possible :)
 
 -   [X] Debug and finish server's get method and set method
 -   [X] Try to abstract bootstrap, set-key and get-key method
--   [ ] Refactor rpc method famework
+-   [X] Refactor rpc method famework
+-   [ ] Add async and concurrerent rpc call
 -   [ ] Handle rpc error condtions
 -   [ ] Add server stop method
 -   [ ] Refactor kbucket's nodes data type, make it easy use
--   [ ] Add async and concurrerent rpc call
 -   [ ] Add test case
 -   [ ] Add logic: When new node found, call store key/value when need
 -   [ ] Make initialize class order correct
